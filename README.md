@@ -1,126 +1,184 @@
-# ORKG frontend
+# Smart Paper Analysis Frontend
 
-This is the repository for the frontend of the Open Research Knowledge Grapph (ORKG), which is running live at: https://orkg.org.
-Detailed user documentation can be found in the Wiki at: https://gitlab.com/TIBHannover/orkg/orkg-frontend/-/wikis/home
+Frontend for **SARAG (Section-Aware Retrieval-Augmented Generation)** system, a hybrid neuro-symbolic approach for scholarly knowledge extraction from scientific papers.
 
-## Frontend installation
+This project extends the [ORKG Frontend](https://gitlab.com/TIBHannover/orkg/orkg-frontend) with a Smart Paper Analysis feature that provides a five-stage pipeline for research article annotation.
+
+[![Node.js 16+](https://img.shields.io/badge/node-16+-green.svg)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Features
+
+### Smart Paper Analysis (`/paper-analysis`)
+
+A five-stage pipeline for research article annotation:
+
+1. **Metadata Extraction**: Extract bibliographic information from papers
+2. **Research Field Detection**: Identify research fields using taxonomy-aligned corpus
+3. **Research Problem Identification**: Find similar problems via ORKG + LLM embeddings
+4. **Template Selection/Generation**: Select ORKG templates or generate via LLM
+5. **Content Extraction**: Extract section-based content with evidence tracking
+
+### Additional Features
+
+- **Data Tracking**: Track all extraction steps and user interactions
+- **GitHub Integration**: Save evaluation data directly to GitHub repository
+- **Hybrid Neuro-Symbolic**: Automatic LLM fallback when ORKG data is unavailable
+
+## Installation
 
 ### Prerequisites
 
-In order to run the frontend, ensure that Node.js is installed (version >=16.0.0). Check whether you have the right version installed using your command prompt or terminal, run: `node --version`. For more information about installing or upgrading Node.js, see: https://nodejs.org/en/download/.
+- Node.js >= 16.0.0 ([Download](https://nodejs.org/en/download/))
+- [Smart Paper Analysis Backend](https://github.com/Webo1980/smart-paper-analysis-backend) running locally
 
-### Installation
+### Setup
 
-Clone this repository:
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Webo1980/smart-paper-analysis-frontend.git
+   cd smart-paper-analysis-frontend
+   ```
 
-    git clone https://gitlab.com/TIBHannover/orkg/orkg-frontend.git
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Go to the frontend directory:
+3. **Configure environment variables**
+   
+   Copy the default environment file:
+   ```bash
+   cp default.env .env
+   ```
 
-    cd orkg-frontend
+4. **Add Smart Paper Analysis configuration**
+   
+   Add the following to your `.env` file:
+   ```env
+   # Smart Paper Analysis API (Backend)
+   NEXT_PUBLIC_PAPER_ANALYSIS_API=http://localhost:8000/api/v2
+   
+   # LLM Configuration (Mistral)
+   NEXT_PUBLIC_MODEL_NAME=mistral-medium
+   NEXT_PUBLIC_API_KEY=your_mistral_api_key
+   NEXT_PUBLIC_LLM_TEMPERATURE=0.7
+   
+   # GitHub Integration (for evaluation data storage)
+   NEXT_PUBLIC_GITHUB_TOKEN=your_github_token
+   NEXT_PUBLIC_GITHUB_OWNER=your_github_username
+   NEXT_PUBLIC_GITHUB_REPO=your_evaluation_repo
+   ```
 
-Install the dependencies by running:
+### Getting API Keys
 
-    npm install
-
-Copy the file `default.env` to `.env`:
-
-    cp default.env .env
-
-By default, the `.env` file uses the [ORKG sandbox](https://sandbox.orkg.org) APIs. Read the wiki in case you want to [quickly switch between environments](https://gitlab.com/TIBHannover/orkg/orkg-frontend/-/wikis/Switch-between-environments).
-
-The **environment variables** descriptions:
-
-| Variable                             | Development | Production  | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------------------ | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| NEXT_PUBLIC_PUBLIC_URL               | ✅ Used     | ✅ Used     | The directory from which the frontend is served (set to "/" for running in the root directory)                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| BROWSER                              | ✅ Used     | 🚫 Ignored  | By default, Create React App will open the default system browser, favoring Chrome on macOS. Specify a [browser](https://github.com/sindresorhus/open#app) to override this behavior, or set it to `none` to disable it completely. If you need to customize the way the browser is launched, you can specify a node script instead. Any arguments passed to `npm start` will also be passed to this script, and the url where your app is served will be the last argument. Your script's file name must have the `.js` extension. |
-| FAST_REFRESH                         | ✅ Used     | 🚫 Ignored  | When set to `false`, disables experimental support for Fast Refresh to allow you to tweak your components in real time without reloading the page.                                                                                                                                                                                                                                                                                                                                                                                  |
-| GENERATE_SOURCEMAP                   | 🚫 Ignored  | ✅ Used     | When set to false, source maps are not generated for a production build. This solves out of memory (OOM) issues on some smaller machines. For development, we recommend setting this to false, to hide warnings related to missing source maps from dependencies.                                                                                                                                                                                                                                                                   |
-| ESLINT_NO_DEV_ERRORS                 | ✅ Used     | 🚫 Ignored  | When set to `true`, ESLint errors are converted to warnings during development. As a result, ESLint output will no longer appear in the error overlay.                                                                                                                                                                                                                                                                                                                                                                              |
-| NEXT_PUBLIC_BACKEND_URL              | ✅ Used     | ✅ Used     | ORKG backend endpoint (use http://localhost:8080/ when running the backend locally)                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| NEXT_PUBLIC_SIMILARITY_SERVICE_URL   | ✅ Used     | ✅ Used     | ORKG similarity service endpoint (use http://localhost:5000/ when running the service locally)                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| NEXT_PUBLIC_ANNOTATION_SERVICE_URL   | ✅ Used     | ✅ Used     | ORKG annotation service endpoint                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| NEXT_PUBLIC_SIMILAR_PAPER_URL        | ✅ Used     | ✅ Used     | ORKG [similar papers](https://gitlab.com/TIBHannover/orkg/orkg-simpaper-api) service endpoint                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| NEXT_PUBLIC_NLP_SERVICE_URL          | ✅ Used     | ✅ Used     | ORKG [NLP service](https://gitlab.com/TIBHannover/orkg/nlp/orkg-nlp-api) endpoint                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| NEXT_PUBLIC_GROBID_URL               | ✅ Used     | ✅ Used     | GROBID service endpoint (More details in ORKG annotation repository)                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| NEXT_PUBLIC_SEMANTIC_SCHOLAR_URL     | ✅ Used     | ✅ Used     | semanticscholar.org API. Used to fetch the abstract of papers                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| NEXT_PUBLIC_AUTHENTICATION_CLIENT_ID | ✅ Used     | ✅ Used     | ORKG Authentication client ID                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN   | ✅ Used     | ✅ Used     | (Optional) CHATWOOT Token. Used to show a floating button to provide chat support for users.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| NEXT_PUBLIC_GEONAMES_API_SEARCH_URL  | ✅ Used     | ✅ Used     | GeoNames Search Webservice Url                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| NEXT_PUBLIC_GEONAMES_API_USERNAME    | ✅ Used     | ✅ Used     | Username to access [GeoNames](https://www.geonames.org/export/) API (20'000 credits daily limit per application -identified by this parameter-)                                                                                                                                                                                                                                                                                                                                                                                     |
-| NEXT_PUBLIC_IS_TESTING_SERVER        | ✅ Used     | ✅ Used     | Used to show a top banner indicating that it a testing environment. Accepted values : true or false                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| NEXT_PUBLIC_MATOMO_TRACKER           | ✅ Used     | ✅ Used     | Tracking visitors using Matomo Tracker. Accepted values : true or false                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| NEXT_PUBLIC_MATOMO_TRACKER_URL       | ✅ Optional | ✅ Optional | Tracker URL of Matomo configuration                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| NEXT_PUBLIC_MATOMO_TRACKER_SITE_ID   | ✅ Optional | ✅ Optional | Site ID of Matomo configuration                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| NEXT_PUBLIC_PWC_USER_ID              | ✅ Optional | ✅ Optional | ID of the user used to import Papers with code data                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| NEXT_PUBLIC_OLS_BASE_URL             | ✅ Used     | ✅ Used     | [Ontology Lookup Service](https://www.ebi.ac.uk/ols/) API                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| NEXT_PUBLIC_CMS_URL                  | ✅ Used     | ✅ Used     | CMS URL of [Strapi](https://gitlab.com/TIBHannover/orkg/strapi)                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| NEXT_PUBLIC_ALTMETRIC_URL            | ✅ Used     | ✅ Used     | URL of [Altmetric](https://www.altmetric.com/) API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| NEXT_PUBLIC_DATACITE_URL             | ✅ Used     | ✅ Used     | URL [Datacite api](https://support.datacite.org/docs/api) URL                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| NEXT_PUBLIC_ORCID_API_URL            | ✅ Used     | ✅ Used     | URL of [ORCID](https://info.orcid.org/documentation/api-tutorials/api-tutorial-searching-the-orcid-registry) API URL                                                                                                                                                                                                                                                                                                                                                                                                                |
-| NEXT_PUBLIC_URL                      | ✅ Used     | ✅ Used     | The full URL of the frontend, without trailing slash. E.g., `https://orkg.org`                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| NEXT_PUBLIC_OPEN_CITATIONS_URL       | ✅ Used     | ✅ Used     | URL [OpenCitations](https://opencitations.net/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| NEXT_PUBLIC_WIKIDATA_URL             | ✅ Used     | ✅ Used     | URL of the [Wikidata](https://www.wikidata.org/w/api.php) API                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| NEXT_PUBLIC_UNPAYWALL_URL            | ✅ Used     | ✅ Used     | URL of the [Unpaywall](https://unpaywall.org/products/api) API                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| NEXT_PUBLIC_UNPAYWALL_EMAIL          | ✅ Used     | ✅ Used     | Email used for authentication on the [Unpaywall](https://unpaywall.org/products/api) API                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| NEXT_PUBLIC_WIKIDATA_SPARQL          | ✅ Used     | ✅ Used     | URL of the [Wikidata SPARQL](https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service) endpoint                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| NEXT_PUBLIC_MASTODON_URL             | ✅ Used     | ✅ Used     | URL of the [Mastodon](https://mastodon.social) API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| NEXT_PUBLIC_MASTODON_ACCOUNT_ID      | ✅ Used     | ✅ Used     | Account ID on [Mastodon](https://mastodon.social)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-
-_PLEASE MAKE SURE YOU USE HTTPS INSTEAD OF HTTP URLS._
-
-### Backend service
-
-In order to run the frontend, the backend needs to be running as well. Please refer to the [ORKG backend repository](https://gitlab.com/TIBHannover/orkg/orkg-backend) for instructions on how to run the backend. Easiest is to run the backend within a docker container.
-
-Make sure that your backend instance contains the default classes and properties, the list is defined in the file `constants/graphSettings.js`, you can run this [python snippet](https://gitlab.com/TIBHannover/orkg/orkg-backend/-/snippets/1959376) to create them in your backend.
-
-Two additional services are used in the frontend. These services are: [ORKG similarity](https://gitlab.com/TIBHannover/orkg/orkg-similarity) and [ORKG annotation](https://gitlab.com/TIBHannover/orkg/annotation). These services are not critical for the frontend to operate, but some for functionalities the message `Couldn't connect to service ...` appears. This message can be ignored, or can be fixed by running the respective service locally.
+| Service | How to Get |
+|---------|------------|
+| Mistral API | Sign up at [console.mistral.ai](https://console.mistral.ai/) |
+| GitHub Token | Create at [github.com/settings/tokens](https://github.com/settings/tokens) with `repo` scope |
 
 ## Running
 
-Run the following command:
+### Start the Backend First
 
-    npm run dev
+Ensure the [Smart Paper Analysis Backend](https://github.com/Webo1980/smart-paper-analysis-backend) is running:
 
-Open the browser and enter the URL of the application: http://localhost:3000/.
+```bash
+# In the backend directory
+python -m src.main
+```
 
-### Running in Docker
+### Start the Frontend
 
-It is also possible to run the frontend in Docker. It is easiest to use Docker Compose.
+```bash
+npm run dev
+```
 
-Make sure you have a configured .env file:
+Open your browser at: **http://localhost:3000/paper-analysis**
 
-Copy the file `default.env` to `.env`:
+### Running with Docker
 
-    cp default.env .env
+```bash
+cp default.env .env
+# Edit .env with your configuration
+docker-compose up -d
+```
 
-Start the application
+## Project Structure
 
-    docker-compose up -d
+```
+smart-paper-analysis-frontend/
+├── src/
+│   └── app/
+│       └── paper-analysis/      # Smart Paper Analysis feature
+│           ├── components/      # UI components
+│           ├── hooks/           # Custom React hooks
+│           ├── services/        # API integration
+│           └── page.tsx         # Main page
+├── default.env                  # Default environment template
+├── .env                         # Your configuration (not in repo)
+└── ...                          # Other ORKG frontend files
+```
 
-Open the browser and enter the URL of the application: http://localhost:3000/.
+## Configuration Reference
 
-# Contributing
+### Smart Paper Analysis Variables
 
-Please feel free to contribute to our code. In case you found any bugs, please [raise an issue](https://gitlab.com/TIBHannover/orkg/orkg-frontend/issues). In case you want to contribute code, [open a merge request](https://gitlab.com/TIBHannover/orkg/orkg-frontend/merge_requests).
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NEXT_PUBLIC_PAPER_ANALYSIS_API` | ✅ | Backend API endpoint |
+| `NEXT_PUBLIC_MODEL_NAME` | ✅ | LLM model name (e.g., `mistral-medium`) |
+| `NEXT_PUBLIC_API_KEY` | ✅ | Mistral API key |
+| `NEXT_PUBLIC_LLM_TEMPERATURE` | Optional | LLM temperature (default: 0.7) |
+| `NEXT_PUBLIC_GITHUB_TOKEN` | Optional | GitHub token for data storage |
+| `NEXT_PUBLIC_GITHUB_OWNER` | Optional | GitHub repository owner |
+| `NEXT_PUBLIC_GITHUB_REPO` | Optional | GitHub repository name |
 
-We use [React](https://reactjs.org/) as frontend framework. Additionally, we use [Redux](https://redux.js.org/) for state management (but we prefer a local state when possible). For styling we use [Bootstrap](https://getbootstrap.com/) with the package [Reactstrap](https://reactstrap.github.io/). We maintain the following code conventions:
+### ORKG Variables
 
--   Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), and use [Angular commit types](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#type). Linting is applied on the commit message (i.e., you cannot commit if the message is not correctly formatted). You can use the [Commitizen](https://commitizen-tools.github.io/commitizen/) CLI to create a correctly formatted message via: `npm run commit`
--   Running lint on commit (you cannot commit when your code contains lint errors)
--   Run Prettier rules on commit for coding style consistency
--   The [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format is used to automatically generate [our changelog](https://gitlab.com/TIBHannover/orkg/orkg-frontend/blob/master/CHANGELOG.md)
--   We are transitioning to fully adhere to the [Airbnb JavaScript style guide](https://github.com/airbnb/javascript). Currently, some rules are displayed to warnings instead of errors because of the transition period. Please ensure your code does not contain any warnings before commiting.
--   We are transitioning to TypeScript. We started with the [backend service folder](https://gitlab.com/TIBHannover/orkg/orkg-frontend/-/tree/master/src/services/backend). When creating new components, consider doing this in TypeScript.
+For ORKG-specific configuration, refer to the [ORKG Frontend Wiki](https://gitlab.com/TIBHannover/orkg/orkg-frontend/-/wikis/home).
 
-Happy coding! 😁☕️
+Key variables:
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_BACKEND_URL` | ORKG backend endpoint |
+| `NEXT_PUBLIC_SIMILARITY_SERVICE_URL` | ORKG similarity service |
+| `NEXT_PUBLIC_NLP_SERVICE_URL` | ORKG NLP service |
 
-## Storybook component libary
+## Usage
 
-Please have a look at the [Storybook component libary](https://tibhannover.gitlab.io/orkg/orkg-frontend/storybook/) for React components that can be easily reused throughout the code base.
+1. Navigate to **http://localhost:3000/paper-analysis**
+2. Enter a paper URL or DOI
+3. Follow the five-stage pipeline:
+   - Review and edit metadata
+   - Select or confirm research field
+   - Choose or generate research problem
+   - Select or generate template
+   - Review extracted content with evidence highlights
+4. Save results to ORKG or export data
 
-## Value plugins
+## Related Projects
 
-An easy start for contributing is to take a look at [value plugins](https://gitlab.com/TIBHannover/orkg/orkg-frontend/blob/master/src/components/ValuePlugins). These plugins allow for converting data into a appropriate visualization. Currently, we support plugins for the following visualizations: `Boolean checkmarks`, `LaTeX preview`, `External links`. The [boolean checkmarks plugin](https://gitlab.com/TIBHannover/orkg/orkg-frontend/blob/master/src/components/ValuePlugins/Boolean/Boolean.js) provides an easy example on how to create your own value plugins.
+| Project | Description |
+|---------|-------------|
+| [smart-paper-analysis-backend](https://github.com/Webo1980/smart-paper-analysis-backend) | Backend API for SARAG system |
+| [smart-paper-analysis-extension](https://github.com/Webo1980/smart-paper-analysis-extension) | Chrome extension (ORKGEx 2.0) |
+| [smart-paper-analysis-evaluation](https://github.com/Webo1980/smart-paper-analysis-evaluation) | Evaluation dashboard |
+
+## Based on ORKG Frontend
+
+This project is built on top of the [ORKG Frontend](https://gitlab.com/TIBHannover/orkg/orkg-frontend). For detailed ORKG documentation:
+
+- [ORKG Frontend Repository](https://gitlab.com/TIBHannover/orkg/orkg-frontend)
+- [ORKG Frontend Wiki](https://gitlab.com/TIBHannover/orkg/orkg-frontend/-/wikis/home)
+- [ORKG Live](https://orkg.org)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [Open Research Knowledge Graph (ORKG)](https://orkg.org/)
+- [TIB Leibniz Information Centre for Science and Technology](https://www.tib.eu/)
